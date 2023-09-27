@@ -1,6 +1,5 @@
+package com.itm.space.backendresources;
 
-
-import com.itm.space.backendresources.BaseIntegrationTest;
 import com.itm.space.backendresources.api.request.UserRequest;
 import com.itm.space.backendresources.api.response.UserResponse;
 import com.itm.space.backendresources.service.UserService;
@@ -16,7 +15,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ContextConfiguration;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -29,9 +27,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-@ContextConfiguration
-@WithMockUser(username = "user", password = "user", authorities = "ROLE_MODERATOR")
-public class UserControllerTest  extends BaseIntegrationTest {
+
+@WithMockUser(username = "Sergei", password = "1234", authorities = "ROLE_MODERATOR")
+public class UserControllerTest extends BaseIntegrationTest {
 
     private final UserService userService;
 
@@ -61,8 +59,9 @@ public class UserControllerTest  extends BaseIntegrationTest {
     void shouldGetHelloPage() throws Exception {
         mvc.perform(get("/api/users/hello"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("user"));
+                .andExpect(content().string("Sergei"));
     }
+
     @BeforeEach
     public void setup() {
         when(keycloak.realm(anyString())).thenReturn(realmResource);
@@ -72,7 +71,7 @@ public class UserControllerTest  extends BaseIntegrationTest {
     @Test
     void createControllerTest() throws Exception {
 
-        UserRequest userRequest = new UserRequest("vasya", "vasya@ya.com", "12345", "Sergei", "Pupkin");
+        UserRequest userRequest = new UserRequest("Vasya", "1234@mail.com", "12345", "Vasya", "Svyatkin");
         Response response = Response.status(Response.Status.CREATED).location(new URI("user_id")).build();
         when(usersResource.create(any())).thenReturn(response);
 
@@ -87,17 +86,19 @@ public class UserControllerTest  extends BaseIntegrationTest {
         UserRepresentation userRepresentation = new UserRepresentation();
         UUID userId = UUID.randomUUID();
         userRepresentation.setId(String.valueOf(userId));
-        userRepresentation.setFirstName("Bob");
+        userRepresentation.setFirstName("Petya");
 
         when(usersResource.get(anyString())).thenReturn(mock(UserResource.class));
         when(keycloak.realm(anyString()).users().get(anyString()).toRepresentation()).thenReturn(userRepresentation);
         when(keycloak.realm(anyString()).users().get(anyString()).roles()).thenReturn(roleMappingResource);
         when(keycloak.realm(anyString()).users().get(anyString()).roles().getAll()).thenReturn(mappingsRepresentation);
 
+
         UserResponse response = userService.getUserById(userId);
 
+
         mvc.perform(requestWithContent(get("/api/users/{id}", userId), response));
-        assertEquals("Bob", response.getFirstName());
+        assertEquals("Petya", response.getFirstName());
 
 
     }
